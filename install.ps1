@@ -72,8 +72,9 @@ if ($pythonOk) {
     }
 } else {
     Write-Warning "Python 3.10+ was not found or is not fully configured on your system."
-    Write-Host "Please download Python from: https://www.python.org/downloads/" -ForegroundColor Gray
-    Write-Host "Note: Ensure 'Add python.exe to PATH' is checked during installation." -ForegroundColor Gray
+    Write-Host "The glaze_autotile script requires Python to manage AwesomeWM dynamic layouts." -ForegroundColor Yellow
+    Write-Host "You can quickly install it by running this command in a new terminal:" -ForegroundColor Gray
+    Write-Host "  winget install Python.Python.3.11" -ForegroundColor Cyan
 }
 
 # 2. Stop running instances to prevent file lock issues
@@ -203,6 +204,18 @@ if (Test-Path $htmlPath) {
 Write-Host "`nDiscovering installation paths for GlazeWM..." -ForegroundColor Yellow
 $glazeExePath = "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
 if (-not (Test-Path $glazeExePath)) {
+    $altPaths = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\GlazeWM\glazewm.exe"),
+        (Join-Path $userHome "scoop\apps\glazewm\current\glazewm.exe")
+    )
+    foreach ($path in $altPaths) {
+        if (Test-Path $path) {
+            $glazeExePath = $path
+            break
+        }
+    }
+}
+if (-not (Test-Path $glazeExePath)) {
     # Fallback to PATH search
     $findGlaze = Get-Command glazewm -ErrorAction SilentlyContinue
     if ($findGlaze) {
@@ -223,7 +236,9 @@ if ($null -ne $glazeExePath) {
     }
 } else {
     Write-Warning "GlazeWM executable was not found in standard paths or PATH."
-    Write-Host "Please start GlazeWM manually to load the new settings." -ForegroundColor Cyan
+    Write-Host "If you do not have GlazeWM or Zebar installed yet, you can install them using winget:" -ForegroundColor Gray
+    Write-Host "  winget install glzr-io.glazewm" -ForegroundColor Cyan
+    Write-Host "  winget install glzr-io.zebar" -ForegroundColor Cyan
 }
 
 Write-Host "`n==========================================================" -ForegroundColor Green

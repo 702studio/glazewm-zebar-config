@@ -2,7 +2,13 @@ param(
     [string]$Direction
 )
 
-$output = & "{{USERPROFILE_BACKWARD}}\bin\SetDpi.exe" get
+$setDpiPath = "{{USERPROFILE_BACKWARD}}\bin\SetDpi.exe"
+if (-not (Test-Path $setDpiPath)) {
+    Write-Warning "SetDpi.exe was not found at $setDpiPath"
+    Exit 1
+}
+
+$output = & $setDpiPath get
 if ($output -match "(\d+)") {
     $current = [int]$Matches[1]
 } else {
@@ -40,5 +46,5 @@ if ($Direction -eq "up") {
 }
 
 if ($newScale) {
-    & "{{USERPROFILE_BACKWARD}}\bin\SetDpi.exe" $newScale
+    & $setDpiPath $newScale
 }

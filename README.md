@@ -12,16 +12,20 @@ Designed to be **100% Agent-Friendly**: All paths, dependencies, hotkeys, and se
 
 ```
 .
+├── bin/
+│   ├── change_scale.ps1          # Powershell script to toggle display scaling
+│   └── SetDpi.exe                # C++ binary helper to query/set Windows scaling DPI
 ├── glazewm/
 │   └── config.yaml               # GlazeWM main configuration (hotkeys, workspace, gaps, window rules)
 ├── zebar/
 │   ├── settings.json             # Zebar main settings (configures active starter pack on startup)
 │   └── packs/
-│       └── glzr-io.starter/     # Custom Zebar widgets and bar design
+│       └── glzr-io.starter/      # Custom Zebar widgets and bar design
 │           ├── styles.css        # Customized CSS stylesheet for the status bar
 │           ├── with-glazewm.html # Webview HTML rendering widgets linked with GlazeWM
 │           └── zpack.json        # Widget pack configuration metadata
 ├── glaze_autotile.py             # Python autotiling websocket engine (AwesomeWM fair layouts)
+├── glaze-restart.bat             # Batch script to safely restart GlazeWM process
 ├── .gitignore                    # Local state and log file exclusions
 └── README.md                     # This comprehensive setup guide
 ```
@@ -151,3 +155,25 @@ If you have cloned the repository locally:
   - `inner_gap`: `2px` (tiling separation).
   - `outer_gap`: Top is set to `43px` to make room for the Zebar status bar; bottom, left, and right outer gaps are set to `2px`.
 * **Zebar Styling**: The customized starter pack renders with modern Google Sans fonts, showcasing virtual desktop numbers, hardware metrics, active layout status, time, and custom icon alignments.
+
+---
+
+## 🔍 Troubleshooting & Common Issues
+
+### 1. Zebar shows a blank bar or is missing widgets
+* Make sure Zebar is installed via winget (`winget install glzr-io.zebar`).
+* Verify that you ran the `install.ps1` script to populate the folder `%USERPROFILE%\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0`.
+* Check `%USERPROFILE%\.glzr\zebar\settings.json` to verify that the startup config is pointed to `glzr-io.starter` and `with-glazewm`.
+
+### 2. Autotiler layouts do not cycle (`Ctrl + Alt + Space` does nothing)
+* Ensure Python is installed (`python --version`) and is in your system `PATH`. Reinstall it using `winget install Python.Python.3.11` if missing.
+* Ensure the `websockets` Python library is installed. Run: `pip install websockets` in your terminal.
+* Inspect the autotiler logs for details: `%USERPROFILE%\.glzr\glazewm\autotile.log` and `%USERPROFILE%\.glzr\glazewm\errors.log`.
+
+### 3. Display scaling hotkeys (`Ctrl+Alt+Shift+Up/Down`) do not change scaling
+* Test if the SetDpi utility runs on your machine. Open PowerShell and run:
+  ```powershell
+  & "$env:USERPROFILE\bin\SetDpi.exe" get
+  ```
+* If it returns your current scaling (e.g. `125`), it is working. Make sure your execution policy allows executing the local powershell script: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
+
