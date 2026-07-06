@@ -128,6 +128,24 @@ The layout script acts as an IPC intermediary connecting to GlazeWM over local w
 
 ---
 
+## 🖥️ Interactive Display Scaling (DPI Toggle)
+
+Most tiling setups do not allow changing display scaling easily without navigating deep into Windows Settings. This configuration includes an automated, hotkey-driven DPI scaling switcher.
+
+### Keybindings:
+* **`Ctrl + Alt + Shift + Up`**: Increase display scaling.
+* **`Ctrl + Alt + Shift + Down`**: Decrease display scaling.
+
+### Supported Scaling Levels:
+Cycles dynamically through: `100%` ➔ `125%` ➔ `150%` ➔ `175%` ➔ `200%`.
+
+### How it Works:
+1. When you trigger the hotkey, GlazeWM executes `change_scale.ps1` with the argument `up` or `down`.
+2. The script queries your primary monitor's current scaling factor using the precompiled `SetDpi.exe` tool.
+3. It finds the next/previous scaling percentage in the supported levels array and sets it instantly using `SetDpi.exe <percentage>`.
+
+---
+
 ## 🚀 Setup & Installation Instructions
 
 You can install this configuration environment in one of two ways:
