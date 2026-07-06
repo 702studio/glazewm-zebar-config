@@ -225,6 +225,41 @@ if (-not (Test-Path $glazeExePath)) {
     }
 }
 
+if ($null -eq $glazeExePath) {
+    Write-Host "GlazeWM / Zebar was not detected on your system." -ForegroundColor Yellow
+    $response = "n"
+    if ([Environment]::UserInteractive) {
+        try {
+            Write-Host "Would you like to install GlazeWM and Zebar automatically via Windows Package Manager (winget)? (y/n)" -ForegroundColor Cyan
+            $response = Read-Host
+        } catch {
+            $response = "n"
+        }
+    }
+    
+    if ($response -eq 'y' -or $response -eq 'yes') {
+        Write-Host "Installing GlazeWM..." -ForegroundColor Gray
+        try {
+            & winget install glzr-io.glazewm --accept-package-agreements --accept-source-agreements --exact
+            Write-Host "Installing Zebar..." -ForegroundColor Gray
+            & winget install glzr-io.zebar --accept-package-agreements --accept-source-agreements --exact
+            
+            # Re-verify path after installation
+            $glazeExePath = "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
+            if (-not (Test-Path $glazeExePath)) {
+                $findGlaze = Get-Command glazewm -ErrorAction SilentlyContinue
+                if ($findGlaze) { $glazeExePath = $findGlaze.Source }
+            }
+        } catch {
+            Write-Warning "winget installation encountered an error: $_"
+        }
+    } else {
+        Write-Warning "GlazeWM/Zebar is not installed. To install them manually, run:"
+        Write-Host "  winget install glzr-io.glazewm" -ForegroundColor Cyan
+        Write-Host "  winget install glzr-io.zebar" -ForegroundColor Cyan
+    }
+}
+
 if ($null -ne $glazeExePath) {
     Write-Host "[OK] GlazeWM found at: $glazeExePath" -ForegroundColor Green
     Write-Host "Starting GlazeWM (Zebar status bar will auto-launch with it)..." -ForegroundColor Cyan
@@ -234,11 +269,6 @@ if ($null -ne $glazeExePath) {
     } catch {
         Write-Warning "Could not start GlazeWM automatically. Please launch it manually."
     }
-} else {
-    Write-Warning "GlazeWM executable was not found in standard paths or PATH."
-    Write-Host "If you do not have GlazeWM or Zebar installed yet, you can install them using winget:" -ForegroundColor Gray
-    Write-Host "  winget install glzr-io.glazewm" -ForegroundColor Cyan
-    Write-Host "  winget install glzr-io.zebar" -ForegroundColor Cyan
 }
 
 Write-Host "`n==========================================================" -ForegroundColor Green
