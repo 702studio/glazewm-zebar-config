@@ -177,3 +177,11 @@ If you have cloned the repository locally:
   ```
 * If it returns your current scaling (e.g. `125`), it is working. Make sure your execution policy allows executing the local powershell script: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
 
+---
+
+## 🤝 Credits & Acknowledgements
+
+This configuration setup utilizes the following open-source utility for Windows display scaling control:
+* **[SetDPI](https://github.com/imniko/SetDPI)** by **[imniko](https://github.com/imniko)**: A lightweight CLI tool that allows changing Windows display scaling settings per monitor. The precompiled executable is bundled inside the `bin/` directory for installation convenience.
+
+
