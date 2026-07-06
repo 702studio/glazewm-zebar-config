@@ -105,7 +105,7 @@ These shortcuts communicate directly with the background autotiler engine `glaze
 * **`Alt + Q`**: Close the focused window.
 * **`Alt + Shift + R`**: Reload GlazeWM configuration (`wm-reload-config`).
 * **`Alt + Shift + W`**: Redraw all windows (`wm-redraw`).
-* **`Alt + Shift + P`**: Pause GlazeWM (temporarily disables tiling & hotkeys).
+* **`Alt + Shift + P`**: Toggle Pause / Resume GlazeWM (temporarily suspends/enables window tiling and hotkeys, useful for gaming or full-screen apps).
 * **`Alt + Shift + Backspace`**: Restart GlazeWM process using local helper script `glaze-restart.bat`.
 * **`Alt + Shift + E`**: Exit GlazeWM and close the window manager interface.
 
