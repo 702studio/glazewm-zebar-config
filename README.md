@@ -126,31 +126,21 @@ The layout script acts as an IPC intermediary connecting to GlazeWM over local w
 
 ## 🚀 Setup & Installation Instructions
 
-### Prerequisites
-* **GlazeWM v3.0.0+** & **Zebar v3.0.0+** installed on Windows.
-* **Python 3.10+** (Added to `PATH` environment variables).
-* **websockets** module installed in Python.
+You can install this configuration environment in one of two ways:
 
-Install the Python websocket dependency:
-```cmd
-pip install websockets
-```
-
-### Automated Script (Copy-Paste to PowerShell)
-Run the following script block to install your configuration files directly to their respective Windows AppData and configuration paths:
-
+### Method 1: Web Installer (Quickest)
+Open PowerShell and run this single command to automatically download, install dependencies, copy configurations, and tailor user paths:
 ```powershell
-# Create configuration folders
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.glzr\glazewm"
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.glzr\zebar"
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0"
-
-# Copy configurations from repository to the system paths
-Copy-Item "glaze_autotile.py" "$env:USERPROFILE\glaze_autotile.py" -Force
-Copy-Item "glazewm\config.yaml" "$env:USERPROFILE\.glzr\glazewm\config.yaml" -Force
-Copy-Item "zebar\settings.json" "$env:USERPROFILE\.glzr\zebar\settings.json" -Force
-Copy-Item -Path "zebar\packs\glzr-io.starter\*" -Destination "$env:USERPROFILE\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0\" -Recurse -Force
+irm https://raw.githubusercontent.com/tolgaozisik/glazewm-zebar-config/main/install.ps1 | iex
 ```
+
+### Method 2: Local Installer (From Clone)
+If you have cloned the repository locally:
+1. Open PowerShell inside the repository root directory.
+2. Run the installer script:
+   ```powershell
+   .\install.ps1
+   ```
 
 ---
 
