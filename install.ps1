@@ -115,6 +115,7 @@ $filesToSync = @(
     @{ Src = "glaze_autotile.py"; Dest = Join-Path $userHome "glaze_autotile.py" },
     @{ Src = "glaze-restart.bat"; Dest = Join-Path $userHome "glaze-restart.bat" },
     @{ Src = "bin/change_scale.ps1"; Dest = Join-Path $binDir "change_scale.ps1" },
+    @{ Src = "bin/SetDpi.exe"; Dest = Join-Path $binDir "SetDpi.exe" },
     @{ Src = "glazewm/config.yaml"; Dest = Join-Path $glazeConfigDir "config.yaml" },
     @{ Src = "zebar/settings.json"; Dest = Join-Path $zebarConfigDir "settings.json" },
     @{ Src = "zebar/packs/glzr-io.starter/zpack.json"; Dest = Join-Path $zebarPackDir "zpack.json" },
