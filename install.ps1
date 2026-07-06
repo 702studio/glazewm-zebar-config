@@ -164,7 +164,7 @@ $yamlPath = Join-Path $glazeConfigDir "config.yaml"
 if (Test-Path $yamlPath) {
     try {
         $content = Get-Content $yamlPath -Raw
-        $newContent = $content.Replace("C:/Users/tolgaozisik", $homeUrlStyle)
+        $newContent = $content.Replace("{{USERPROFILE_FORWARD}}", $homeUrlStyle)
         Set-Content $yamlPath $newContent -Force
         Write-Host "[OK] GlazeWM config.yaml updated dynamically." -ForegroundColor Gray
     } catch {
@@ -177,11 +177,24 @@ $scaleScriptPath = Join-Path $binDir "change_scale.ps1"
 if (Test-Path $scaleScriptPath) {
     try {
         $content = Get-Content $scaleScriptPath -Raw
-        $newContent = $content.Replace("C:\Users\tolgaozisik", $userHome)
+        $newContent = $content.Replace("{{USERPROFILE_BACKWARD}}", $userHome)
         Set-Content $scaleScriptPath $newContent -Force
         Write-Host "[OK] change_scale.ps1 updated dynamically." -ForegroundColor Gray
     } catch {
         Write-Warning "Could not customize change_scale.ps1: $_"
+    }
+}
+
+# Update with-glazewm.html path placeholders
+$htmlPath = Join-Path $zebarPackDir "with-glazewm.html"
+if (Test-Path $htmlPath) {
+    try {
+        $content = Get-Content $htmlPath -Raw
+        $newContent = $content.Replace("{{USERPROFILE_FORWARD}}", $homeUrlStyle)
+        Set-Content $htmlPath $newContent -Force
+        Write-Host "[OK] Zebar with-glazewm.html updated dynamically." -ForegroundColor Gray
+    } catch {
+        Write-Warning "Could not customize with-glazewm.html: $_"
     }
 }
 

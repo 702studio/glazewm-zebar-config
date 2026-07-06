@@ -2,7 +2,7 @@ param(
     [string]$Direction
 )
 
-$output = & "C:\Users\tolgaozisik\bin\SetDpi.exe" get
+$output = & "{{USERPROFILE_BACKWARD}}\bin\SetDpi.exe" get
 if ($output -match "(\d+)") {
     $current = [int]$Matches[1]
 } else {
@@ -40,5 +40,5 @@ if ($Direction -eq "up") {
 }
 
 if ($newScale) {
-    & "C:\Users\tolgaozisik\bin\SetDpi.exe" $newScale
+    & "{{USERPROFILE_BACKWARD}}\bin\SetDpi.exe" $newScale
 }

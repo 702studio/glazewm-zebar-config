@@ -2,7 +2,7 @@ general:
   # Commands to run when the WM has started. This is useful for running a
   # script or launching another application.
   # Example: The below command launches Zebar.
-  startup_commands: ['shell-exec zebar', 'shell-exec pythonw C:/Users/tolgaozisik/glaze_autotile.py --no-stats']
+  startup_commands: ['shell-exec zebar', 'shell-exec pythonw {{USERPROFILE_FORWARD}}/glaze_autotile.py --no-stats']
 
   # Commands to run just before the WM is shutdown.
   # Example: The below command kills Zebar.
@@ -238,9 +238,9 @@ keybindings:
     bindings: ['alt+shift+space']
 
   # Cycle AwesomeWM-style layout guidance used by glaze_autotile.py.
-  - commands: ['shell-exec pythonw C:/Users/tolgaozisik/glaze_autotile.py --layout-next']
+  - commands: ['shell-exec pythonw {{USERPROFILE_FORWARD}}/glaze_autotile.py --layout-next']
     bindings: ['ctrl+alt+space']
-  - commands: ['shell-exec pythonw C:/Users/tolgaozisik/glaze_autotile.py --layout-prev']
+  - commands: ['shell-exec pythonw {{USERPROFILE_FORWARD}}/glaze_autotile.py --layout-prev']
     bindings: ['ctrl+alt+shift+space']
 
   # Change focus from tiling windows -> floating -> fullscreen.
@@ -272,7 +272,7 @@ keybindings:
     bindings: ['alt+shift+e']
 
   # Restart GlazeWM process completely.
-  - commands: ['shell-exec C:/Users/tolgaozisik/glaze-restart.bat']
+  - commands: ['shell-exec {{USERPROFILE_FORWARD}}/glaze-restart.bat']
     bindings: ['alt+shift+backspace']
 
   # Re-evaluate configuration file.
@@ -300,7 +300,7 @@ keybindings:
     bindings: ['alt+o']
 
   # Launch Application launcher
-  - commands: ['shell-exec C:/Users/tolgaozisik/AppData/Local/FlowLauncher/Flow.Launcher.exe']
+  - commands: ['shell-exec {{USERPROFILE_FORWARD}}/AppData/Local/FlowLauncher/Flow.Launcher.exe']
     bindings: ['alt+r']
 
   # Launch Cursor editor
@@ -389,7 +389,7 @@ keybindings:
     bindings: ['alt+control+9']
 
   # Increase / Decrease display scaling
-  - commands: ['shell-exec powershell.exe -ExecutionPolicy Bypass -File C:/Users/tolgaozisik/bin/change_scale.ps1 up']
+  - commands: ['shell-exec powershell.exe -ExecutionPolicy Bypass -File {{USERPROFILE_FORWARD}}/bin/change_scale.ps1 up']
     bindings: ['ctrl+alt+shift+up']
-  - commands: ['shell-exec powershell.exe -ExecutionPolicy Bypass -File C:/Users/tolgaozisik/bin/change_scale.ps1 down']
+  - commands: ['shell-exec powershell.exe -ExecutionPolicy Bypass -File {{USERPROFILE_FORWARD}}/bin/change_scale.ps1 down']
     bindings: ['ctrl+alt+shift+down']

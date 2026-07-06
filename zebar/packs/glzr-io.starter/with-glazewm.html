@@ -187,7 +187,7 @@
                         title={preset.label}
                         onClick={() =>
                           output.glazewm.runCommand(
-                            `shell-exec pythonw C:/Users/tolgaozisik/glaze_autotile.py --layout ${preset.command}`,
+                            `shell-exec pythonw {{USERPROFILE_FORWARD}}/glaze_autotile.py --layout ${preset.command}`,
                           )
                         }
                       >
