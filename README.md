@@ -1,92 +1,163 @@
-# Windows Customization Setup: GlazeWM & Zebar Configurations
+# Windows Tiling WM & Bar Customization Setup (GlazeWM + Zebar)
 
-This repository contains my personal, custom configurations for [GlazeWM](https://github.com/glzr-io/glazewm) (tiling window manager) and [Zebar](https://github.com/glzr-io/zebar) (customizable desktop status bar) on Windows. It includes a custom autotiler python script to replicate AwesomeWM-style fair/columns/rows layout behavior.
+This repository contains my personal, custom-tailored configuration environment for [GlazeWM](https://github.com/glzr-io/glazewm) (tiling window manager) and [Zebar](https://github.com/glzr-io/zebar) (customizable desktop status bar) on Windows. 
 
-Designed to be **Agent-Friendly** (fully automated installation scripts and clear structure for AI assistants).
+It includes a custom, background autotiling engine (`glaze_autotile.py`) to replicate AwesomeWM-style dynamic layouts (fair, columns, rows) through GlazeWM's local websocket IPC interface.
+
+Designed to be **100% Agent-Friendly**: All paths, dependencies, hotkeys, and setup procedures are documented explicitly for AI coding agents and human administrators alike.
 
 ---
 
-## Directory Structure
+## 📂 Repository Directory Layout
 
 ```
 .
 ├── glazewm/
-│   └── config.yaml               # GlazeWM main configuration (hotkeys, workspace, gaps)
+│   └── config.yaml               # GlazeWM main configuration (hotkeys, workspace, gaps, window rules)
 ├── zebar/
-│   ├── settings.json             # Zebar main settings (defines active packs/presets)
+│   ├── settings.json             # Zebar main settings (configures active starter pack on startup)
 │   └── packs/
 │       └── glzr-io.starter/     # Custom Zebar widgets and bar design
-│           ├── styles.css        # Customized styles for the bar
-│           ├── with-glazewm.html # customized HTML structure for GlazeWM widgets
+│           ├── styles.css        # Customized CSS stylesheet for the status bar
+│           ├── with-glazewm.html # Webview HTML rendering widgets linked with GlazeWM
 │           └── zpack.json        # Widget pack configuration metadata
-└── glaze_autotile.py             # Python script for AwesomeWM-style autotiling logic
+├── glaze_autotile.py             # Python autotiling websocket engine (AwesomeWM fair layouts)
+├── .gitignore                    # Local state and log file exclusions
+└── README.md                     # This comprehensive setup guide
 ```
 
 ---
 
-## Custom Features
+## 🎹 Comprehensive Hotkey Mapping (Keybindings)
 
-1. **AwesomeWM-Style Autotiling (`glaze_autotile.py`)**:
-   - Runs in the background via local websockets to GlazeWM (port `6123`).
-   - Supports `fair`, `fair_horizontal`, `columns`, and `rows` layout modes.
-   - Saves layout state to `~/.glzr/glazewm/autotile_state.json` and syncs with Zebar layouts dynamically.
-   - Includes custom popup/toast alerts when changing layout.
+GlazeWM controls are triggered using `Alt` as the modifier key. The keybindings are organized into functional groups below:
 
-2. **Gaps & Visual Effects**:
-   - Thin outer gaps (`2px`), slightly taller top gap (`43px`) to accommodate the top status bar.
-   - Cyan/light blue focused border (`#00d7ff`) to make focused windows pop out.
-   - Workspace rules to keep background hook processes separate from primary workspaces.
+### 1. Workspace Focus & Navigation
+| Shortcut | Action / Command | Description |
+| :--- | :--- | :--- |
+| `Alt + 1` to `9` | `focus --workspace 1-9` | Focus workspace number 1 through 9. |
+| `Alt + J` | `focus --prev-workspace` | Focus the previous workspace in order. |
+| `Alt + K` | `focus --next-workspace` | Focus the next workspace in order. |
+| `Alt + A` | `focus --prev-active-workspace` | Focus the previous active workspace. |
+| `Alt + S` | `focus --next-active-workspace` | Focus the next active workspace. |
+| `Alt + D` | `focus --recent-workspace` | Focus the workspace that last had focus. |
+| `Alt + Up / Down` | `focus --direction up / down` | Move window focus vertically. |
 
-3. **Zebar Integration**:
-   - Displays workspace name, active layout, date/time, hardware specs, and other essential metrics.
-   - Styled with a dark glassmorphic accent and clean modern fonts.
+### 2. Window Movement & Workspace Relocation
+| Shortcut | Action / Command | Description |
+| :--- | :--- | :--- |
+| `Alt + Shift + Up` | `move --direction up` | Swap focused window upwards. |
+| `Alt + Shift + Down` | `move --direction down` | Swap focused window downwards. |
+| `Alt + Shift + Left` | `move --direction left` | Swap focused window to the left. |
+| `Alt + Shift + Right` | `move --direction right` | Swap focused window to the right. |
+| `Alt + Shift + 1` to `9` | `move --workspace 1-9` | Move focused window to workspace 1-9 **without** shifting camera focus. |
+| `Alt + Ctrl + 1` to `9` | `move --workspace 1-9` + focus | Move focused window to workspace 1-9 **and** immediately shift focus to it. |
+| `Alt + Shift + J` | `move --prev-workspace` | Move focused window to the previous workspace. |
+| `Alt + Shift + K` | `move --next-workspace` | Move focused window to the next workspace. |
+| `Alt + Shift + A` | `move-workspace --dir left` | Shift the current workspace's parent container to the left monitor. |
+| `Alt + Shift + F` | `move-workspace --dir right`| Shift the current workspace's parent container to the right monitor. |
+| `Alt + Shift + D` | `move-workspace --dir up`   | Shift the current workspace's parent container to the top monitor. |
+| `Alt + Shift + S` | `move-workspace --dir down` | Shift the current workspace's parent container to the bottom monitor. |
+
+### 3. Window States, Gaps & Sizing
+| Shortcut | Action / Command | Description |
+| :--- | :--- | :--- |
+| `Alt + Space` | `toggle-floating --centered`| Toggle focused window between Tiling and Centered Floating. |
+| `Alt + T` | `toggle-tiling` | Return the focused window to a tiling state. |
+| `Alt + F` | `toggle-fullscreen` | Toggle fullscreen mode for the focused window. |
+| `Alt + N` | `toggle-minimized` | Minimize the focused window. |
+| `Alt + Shift + Space` | `toggle-tiling-direction` | Toggle local split direction (Horizontal / Vertical) for new tiles. |
+| `Alt + H` | `resize --width -5%` | Decrease width of tiling window by 5%. |
+| `Alt + L` | `resize --width +5%` | Increase width of tiling window by 5%. |
+| `Alt + U` | `resize --height +5%` | Increase height of tiling window by 5%. |
+| `Alt + I` | `resize --height -5%` | Decrease height of tiling window by 5%. |
+
+### 4. Interactive Resize Mode
+Press **`Alt + Y`** to enter the interactive **Resize Mode**. This overrides standard bindings, allowing keyboard resizing using direction keys:
+* `H` or `Left Arrow`: Decrease width by 2%
+* `L` or `Right Arrow`: Increase width by 2%
+* `K` or `Up Arrow`: Increase height by 2%
+* `J` or `Down Arrow`: Decrease height by 2%
+* Press **`Escape`** or **`Enter`** to exit Resize Mode.
+
+### 5. Application Launchers & System Commands
+| Shortcut | Action / Command | Launched Target / Script |
+| :--- | :--- | :--- |
+| `Alt + Enter` | Command Line / Shell | Windows Terminal (`wt`) |
+| `Alt + B` | Web Browser | Firefox (`firefox.exe`) |
+| `Alt + E` | File Manager | File Explorer (`explorer.exe`) |
+| `Alt + O` | Note-taking | Obsidian (`obsidian.exe`) |
+| `Alt + C` | Editor | Cursor (`cursor`) |
+| `Alt + R` | Global App Launcher | Flow Launcher (`Flow.Launcher.exe`) |
+| `Ctrl+Alt+Shift+Up`| Display Scaling Up | Custom powershell utility (`change_scale.ps1 up`) |
+| `Ctrl+Alt+Shift+Down`| Display Scaling Down | Custom powershell utility (`change_scale.ps1 down`) |
+
+### 6. Autotiling Layout Cycle
+These shortcuts communicate directly with the background autotiler engine `glaze_autotile.py` to change tiling layouts:
+* **`Ctrl + Alt + Space`**: Cycle forward to the next autotiling layout (`fair` ➔ `fair_horizontal` ➔ `columns` ➔ `rows`).
+* **`Ctrl + Alt + Shift + Space`**: Cycle backward to the previous autotiling layout.
+
+### 7. GlazeWM Management Hotkeys
+* **`Alt + Q`**: Close the focused window.
+* **`Alt + Shift + R`**: Reload GlazeWM configuration (`wm-reload-config`).
+* **`Alt + Shift + W`**: Redraw all windows (`wm-redraw`).
+* **`Alt + Shift + P`**: Pause GlazeWM (temporarily disables tiling & hotkeys).
+* **`Alt + Shift + Backspace`**: Restart GlazeWM process using local helper script `glaze-restart.bat`.
+* **`Alt + Shift + E`**: Exit GlazeWM and close the window manager interface.
 
 ---
 
-## Automatic Installation (PowerShell)
+## 🛠️ Dynamic Autotiling Architecture (`glaze_autotile.py`)
 
-Open PowerShell as an administrator or user, and run the following script block to install all configurations automatically:
+The layout script acts as an IPC intermediary connecting to GlazeWM over local websockets (port `6123`).
+
+### How It Works:
+1. When launched, the script registers subscriptions for workspace events (`window_managed`, `window_unmanaged`, `focus_changed`, etc.).
+2. When windows are opened or repositioned, the script calculates layouts:
+   - **`fair`**: Divides screen real estate into a balanced grid based on window count (similar to AwesomeWM's fair layout).
+   - **`fair_horizontal`**: Same grid math, prioritizing horizontal columns first.
+   - **`columns` / `rows`**: Forces purely vertical or horizontal tiling splits.
+3. If layout mode is set to exact fair, windows are set to `floating` and repositioned precisely with strict gap alignments.
+4. **State Storage**:
+   - Save path: `%USERPROFILE%\.glzr\glazewm\autotile_state.json` (holds layout details and controlled floating IDs).
+   - Zebar synchronization path: `%USERPROFILE%\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0\layout-state.json` (helps Zebar read and display current layout mode).
+
+---
+
+## 🚀 Setup & Installation Instructions
+
+### Prerequisites
+* **GlazeWM v3.0.0+** & **Zebar v3.0.0+** installed on Windows.
+* **Python 3.10+** (Added to `PATH` environment variables).
+* **websockets** module installed in Python.
+
+Install the Python websocket dependency:
+```cmd
+pip install websockets
+```
+
+### Automated Script (Copy-Paste to PowerShell)
+Run the following script block to install your configuration files directly to their respective Windows AppData and configuration paths:
 
 ```powershell
-# 1. Create necessary configuration folders
+# Create configuration folders
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.glzr\glazewm"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.glzr\zebar"
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0"
 
-# 2. Copy glaze_autotile.py to your user directory
+# Copy configurations from repository to the system paths
 Copy-Item "glaze_autotile.py" "$env:USERPROFILE\glaze_autotile.py" -Force
-
-# 3. Copy GlazeWM configuration
 Copy-Item "glazewm\config.yaml" "$env:USERPROFILE\.glzr\glazewm\config.yaml" -Force
-
-# 4. Copy Zebar settings
 Copy-Item "zebar\settings.json" "$env:USERPROFILE\.glzr\zebar\settings.json" -Force
-
-# 5. Copy Zebar Pack Files
 Copy-Item -Path "zebar\packs\glzr-io.starter\*" -Destination "$env:USERPROFILE\AppData\Roaming\zebar\downloads\glzr-io.starter@0.0.0\" -Recurse -Force
 ```
 
 ---
 
-## Dependencies & Requirements
+## 🎨 Layout & UI Design Features
 
-To run this layout engine smoothly, ensure you have:
-
-1. **GlazeWM v3+ & Zebar v3+** installed on Windows.
-2. **Python 3.10+** added to `PATH`.
-3. **Python websockets** module installed. Run:
-   ```bash
-   pip install websockets
-   ```
-4. `pythonw.exe` will be used automatically by GlazeWM startup commands to run the autotiler silently in the background without spawning terminal windows.
-
----
-
-## Controls & Hotkeys
-
-For full hotkeys, check the [config.yaml](file:///./glazewm/config.yaml). Main highlights:
-- `Alt + J`: Previous workspace
-- `Alt + K`: Next workspace
-- `Alt + Up/Down/Left/Right`: Focus navigation
-- `Alt + Shift + Up/Down/Left/Right`: Swap/Move window
-- Autotiling automatically manages splitting layout direction.
+* **Focused Border Styling**: Focused windows are highlighted using a clean `#00d7ff` (cyan) border (`2px` thickness) for high visibility on dark backgrounds.
+* **Workspace Gap Management**:
+  - `inner_gap`: `2px` (tiling separation).
+  - `outer_gap`: Top is set to `43px` to make room for the Zebar status bar; bottom, left, and right outer gaps are set to `2px`.
+* **Zebar Styling**: The customized starter pack renders with modern Google Sans fonts, showcasing virtual desktop numbers, hardware metrics, active layout status, time, and custom icon alignments.
