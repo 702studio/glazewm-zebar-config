@@ -1,0 +1,12 @@
+# Logs and dumps
+*.log
+*.stackdump
+autotile_state.json
+layout-state.json
+
+# Local workspace specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

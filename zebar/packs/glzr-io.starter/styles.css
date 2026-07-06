@@ -1,0 +1,327 @@
+@import 'https://www.nerdfonts.com/assets/css/webfont.css';
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700&display=swap');
+
+:root {
+  --font-family: 'Switzer', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Defaults to dark theme values (standard Windows 11 dark mode) */
+  --bg: #141414;
+  --border: #2a2a2a;
+  --text-active: #F9F8F6;
+  --text-muted: #7C7A77;
+  --text-occupied: #C5C4C1;
+  --accent: #60CDFF;
+  --pill-bg: transparent;
+  --pill-border: transparent;
+  --pill-hover: #242424;
+  
+  --icon-color: #60CDFF;
+  --alert-bg: #3a2f10;
+  --alert-text: #FFB900;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f9f8f6;
+    --border: #deddda;
+    --text-active: #1C1B1A;
+    --text-muted: #8E8D8A;
+    --text-occupied: #4A4947;
+    --accent: #0067C0;
+    --pill-bg: transparent;
+    --pill-border: transparent;
+    --pill-hover: #ecebea;
+    
+    --icon-color: #0067C0;
+    --alert-bg: #fff3d4;
+    --alert-text: #D83B01;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--text-active);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+#root {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: var(--text-active);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Logo & Windows Icon styling */
+.logo {
+  font-size: 14px;
+  color: var(--accent);
+  margin-right: 4px;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.1);
+}
+
+/* Workspaces Indicator */
+.workspaces {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.workspace-number {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.workspace.occupied .workspace-number {
+  color: var(--text-occupied);
+  font-weight: 500;
+}
+
+.workspace.focused .workspace-number,
+.workspace.displayed .workspace-number {
+  color: var(--text-active);
+  font-weight: 700;
+}
+
+.workspace:hover .workspace-number {
+  color: var(--text-active);
+}
+
+/* Workspace active indicator line */
+.workspace-indicator {
+  display: none;
+  width: 0px;
+  height: 2px;
+  background-color: transparent;
+  border-radius: 2px;
+  margin-top: 3px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace.occupied:not(.focused):not(.displayed) .workspace-indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+}
+
+.workspace.displayed .workspace-indicator {
+  width: 6px;
+  height: 3px;
+  background-color: var(--text-occupied);
+}
+
+.workspace.focused .workspace-indicator {
+  width: 14px;
+  height: 3px;
+  background-color: var(--accent);
+}
+
+/* Layout preset indicator */
+.layout-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 2px;
+}
+
+.layout-choice {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 1;
+  padding: 0;
+  outline: none;
+  transition: color 0.15s ease;
+}
+
+.layout-choice:hover,
+.layout-choice.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.layout-icon {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid currentColor;
+  opacity: 1;
+}
+
+.layout-icon::before,
+.layout-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.layout-choice.fair .layout-icon::before {
+  left: 6px;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+
+.layout-choice.fair .layout-icon::after {
+  left: 0;
+  top: 6px;
+  width: 50%;
+  height: 1px;
+}
+
+.layout-choice.fair_horizontal .layout-icon::before {
+  left: 0;
+  top: 6px;
+  width: 100%;
+  height: 1px;
+}
+
+.layout-choice.fair_horizontal .layout-icon::after {
+  left: 6px;
+  top: 0;
+  width: 1px;
+  height: 50%;
+}
+
+.layout-choice.columns .layout-icon {
+  background:
+    linear-gradient(90deg, transparent 31%, currentColor 31%, currentColor 38%, transparent 38%, transparent 62%, currentColor 62%, currentColor 69%, transparent 69%);
+}
+
+.layout-choice.rows .layout-icon {
+  background:
+    linear-gradient(0deg, transparent 31%, currentColor 31%, currentColor 38%, transparent 38%, transparent 62%, currentColor 62%, currentColor 69%, transparent 69%);
+}
+
+/* Minimal typographic status indicators */
+.status-pill {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-occupied);
+  transition: color 0.2s ease;
+  gap: 5px;
+}
+
+.status-pill:hover {
+  color: var(--text-active);
+}
+
+.status-pill i {
+  font-size: 12px;
+  color: var(--icon-color);
+  margin-right: 2px;
+}
+
+.status-pill.cpu-high {
+  color: var(--alert-text);
+}
+
+.status-pill.cpu-high i {
+  color: var(--alert-text);
+}
+
+/* Mode Indicators (Resize, Paused) */
+.mode-pill {
+  background: var(--alert-bg);
+  border: 1px solid var(--alert-text);
+  color: var(--alert-text);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.mode-pill:hover {
+  opacity: 1;
+}
+
+/* Active window title style */
+.window-title {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+}
