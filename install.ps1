@@ -20,38 +20,96 @@ Write-Host "==========================================================" -Foregro
 Write-Host " Starting GlazeWM & Zebar Custom Environment Installation " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 1. Dependency Validation: Python
+# Detect local execution vs web download
+$isLocal = $false
+$localRoot = ""
+if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "glaze_autotile.py"))) {
+    $isLocal = $true
+    $localRoot = $PSScriptRoot
+} elseif (Test-Path "glaze_autotile.py") {
+    $isLocal = $true
+    $localRoot = $PWD.Path
+}
+
+# 1. Dependency Validation: Python (Safe check to avoid Microsoft Store popups)
 Write-Host "`n[1/5] Checking Python installation..." -ForegroundColor Yellow
 $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-if ($null -eq $pythonCmd) {
-    Write-Warning "Python was not found on your system. The autotiler requires Python 3.10+."
-    Write-Host "You can download it from: https://www.python.org/downloads/" -ForegroundColor Gray
-} else {
-    Write-Host "✔ Python found at: $($pythonCmd.Source)" -ForegroundColor Green
-    
+$pythonOk = $false
+
+if ($null -ne $pythonCmd) {
+    # If it points to WindowsApps, it might be the fake Microsoft Store shortcut.
+    # We run a quick 2-second inline check to verify if Python actually executes.
+    $tempFile = [System.IO.Path]::GetTempFileName()
+    try {
+        $process = Start-Process python -ArgumentList '-c "print(\"ok\")"' -NoNewWindow -PassThru -RedirectStandardOutput $tempFile -ErrorAction SilentlyContinue
+        if ($process) {
+            $process | Wait-Process -Timeout 2 -ErrorAction SilentlyContinue
+            if ($process.HasExited -and $process.ExitCode -eq 0) {
+                $output = Get-Content $tempFile -ErrorAction SilentlyContinue
+                if ($output -eq "ok") {
+                    $pythonOk = $true
+                }
+            } else {
+                # Clean up frozen process if it's the Microsoft Store shortcut
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            }
+        }
+    } catch {
+        # Silent ignore, $pythonOk remains false
+    } finally {
+        if (Test-Path $tempFile) { Remove-Item $tempFile -Force -ErrorAction SilentlyContinue }
+    }
+}
+
+if ($pythonOk) {
+    Write-Host "[OK] Python found at: $($pythonCmd.Source)" -ForegroundColor Green
     Write-Host "Checking/Installing required 'websockets' Python library..." -ForegroundColor Yellow
     try {
         & python -m pip install websockets --quiet
-        Write-Host "✔ Python websockets package is ready." -ForegroundColor Green
+        Write-Host "[OK] Python websockets package is ready." -ForegroundColor Green
     } catch {
         Write-Warning "Could not install 'websockets' automatically. Please run: pip install websockets"
     }
+} else {
+    Write-Warning "Python 3.10+ was not found or is not fully configured on your system."
+    Write-Host "Please download Python from: https://www.python.org/downloads/" -ForegroundColor Gray
+    Write-Host "Note: Ensure 'Add python.exe to PATH' is checked during installation." -ForegroundColor Gray
 }
 
-# 2. Folder Creation
-Write-Host "`n[2/5] Creating configuration directories..." -ForegroundColor Yellow
-$dirs = @($glazeConfigDir, $zebarConfigDir, $zebarPackDir, Join-Path $zebarPackDir "resources", $binDir)
+# 2. Stop running instances to prevent file lock issues
+Write-Host "`n[2/5] Stopping running instances of GlazeWM and Zebar to prevent file locks..." -ForegroundColor Yellow
+$glazeProc = Get-Process glazewm -ErrorAction SilentlyContinue
+$zebarProc = Get-Process zebar -ErrorAction SilentlyContinue
+
+if ($glazeProc) {
+    Write-Host "Stopping glazewm.exe..." -ForegroundColor Gray
+    Stop-Process -Name glazewm -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 500
+}
+if ($zebarProc) {
+    Write-Host "Stopping zebar.exe..." -ForegroundColor Gray
+    Stop-Process -Name zebar -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 500
+}
+Write-Host "[OK] Applications stopped." -ForegroundColor Green
+
+# 3. Create Target Folders
+Write-Host "`n[3/5] Creating configuration directories..." -ForegroundColor Yellow
+$dirs = @($glazeConfigDir, $zebarConfigDir, $zebarPackDir, (Join-Path $zebarPackDir "resources"), $binDir)
 foreach ($dir in $dirs) {
     if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Host "Created: $dir" -ForegroundColor Gray
+        try {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            Write-Host "Created folder: $dir" -ForegroundColor Gray
+        } catch {
+            Write-Error "Failed to create directory: $dir. Please check your user permissions."
+        }
     }
 }
-Write-Host "✔ Directories ready." -ForegroundColor Green
+Write-Host "[OK] Directories ready." -ForegroundColor Green
 
-# 3. Source Selection & File Sync
-Write-Host "`n[3/5] Syncing configuration files..." -ForegroundColor Yellow
-$isLocal = Test-Path (Join-Path $PSScriptRoot "glaze_autotile.py") -ErrorAction SilentlyContinue
+# 4. Copy / Download Files
+Write-Host "`n[4/5] Syncing configuration files..." -ForegroundColor Yellow
 
 $filesToSync = @(
     @{ Src = "glaze_autotile.py"; Dest = Join-Path $userHome "glaze_autotile.py" },
@@ -70,66 +128,88 @@ $filesToSync = @(
 
 foreach ($file in $filesToSync) {
     $destPath = $file.Dest
-    if ($isLocal) {
-        $srcPath = Join-Path $PSScriptRoot $file.Src
-        Copy-Item -Path $srcPath -Destination $destPath -Force
-        Write-Host "Copied local: $($file.Src)" -ForegroundColor Gray
-    } else {
-        $url = "$rawBaseUrl/$($file.Src)"
-        Write-Host "Downloading: $($file.Src)..." -ForegroundColor Gray
-        Invoke-RestMethod -Uri $url -OutFile $destPath
+    try {
+        if ($isLocal) {
+            $srcPath = Join-Path $localRoot $file.Src
+            Copy-Item -Path $srcPath -Destination $destPath -Force
+            Write-Host "Copied local: $($file.Src)" -ForegroundColor Gray
+        } else {
+            $url = "$rawBaseUrl/$($file.Src)"
+            Write-Host "Downloading: $($file.Src)..." -ForegroundColor Gray
+            Invoke-RestMethod -Uri $url -OutFile $destPath -TimeoutSec 15
+        }
+    } catch {
+        Write-Warning "Failed to sync file: $($file.Src). Re-trying once..."
+        try {
+            Start-Sleep -Seconds 1
+            if ($isLocal) {
+                Copy-Item -Path $srcPath -Destination $destPath -Force
+            } else {
+                Invoke-RestMethod -Uri $url -OutFile $destPath -TimeoutSec 15
+            }
+            Write-Host "[OK] Successfully synced after retry." -ForegroundColor Green
+        } catch {
+            Write-Error "Failed permanently to sync $($file.Src). Details: $_"
+        }
     }
 }
-Write-Host "✔ Configurations copied." -ForegroundColor Green
+Write-Host "[OK] Configuration files synced." -ForegroundColor Green
 
-# 4. Tailoring Configurations (User Path Replacement)
-Write-Host "`n[4/5] Tailoring configurations to your home folder..." -ForegroundColor Yellow
+# 5. Tailor Configuration Paths Dynamically
+Write-Host "`n[5/5] Tailoring configurations to your local system..." -ForegroundColor Yellow
 $homeUrlStyle = $userHome.Replace('\', '/')
 
 # Update config.yaml path placeholders
 $yamlPath = Join-Path $glazeConfigDir "config.yaml"
 if (Test-Path $yamlPath) {
-    $content = Get-Content $yamlPath -Raw
-    $newContent = $content.Replace("C:/Users/tolgaozisik", $homeUrlStyle)
-    Set-Content $yamlPath $newContent -Force
-    Write-Host "✔ GlazeWM config.yaml updated dynamically." -ForegroundColor Gray
+    try {
+        $content = Get-Content $yamlPath -Raw
+        $newContent = $content.Replace("C:/Users/tolgaozisik", $homeUrlStyle)
+        Set-Content $yamlPath $newContent -Force
+        Write-Host "[OK] GlazeWM config.yaml updated dynamically." -ForegroundColor Gray
+    } catch {
+        Write-Warning "Could not customize config.yaml: $_"
+    }
 }
 
 # Update change_scale.ps1 path placeholders
 $scaleScriptPath = Join-Path $binDir "change_scale.ps1"
 if (Test-Path $scaleScriptPath) {
-    $content = Get-Content $scaleScriptPath -Raw
-    $newContent = $content.Replace("C:\Users\tolgaozisik", $userHome)
-    Set-Content $scaleScriptPath $newContent -Force
-    Write-Host "✔ change_scale.ps1 updated dynamically." -ForegroundColor Gray
+    try {
+        $content = Get-Content $scaleScriptPath -Raw
+        $newContent = $content.Replace("C:\Users\tolgaozisik", $userHome)
+        Set-Content $scaleScriptPath $newContent -Force
+        Write-Host "[OK] change_scale.ps1 updated dynamically." -ForegroundColor Gray
+    } catch {
+        Write-Warning "Could not customize change_scale.ps1: $_"
+    }
 }
-Write-Host "✔ Dynamic path updates completed." -ForegroundColor Green
 
-# 5. Reload Application State
-Write-Host "`n[5/5] Checking for running instances of GlazeWM and Zebar..." -ForegroundColor Yellow
-$glazeProc = Get-Process glazewm -ErrorAction SilentlyContinue
-$zebarProc = Get-Process zebar -ErrorAction SilentlyContinue
-
-if ($glazeProc -or $zebarProc) {
-    Write-Host "Running instances found. Would you like to restart them now to apply config? (y/n)" -ForegroundColor Cyan
-    $response = Read-Host
-    if ($response -eq 'y' -or $response -eq 'yes') {
-        Write-Host "Restarting GlazeWM..." -ForegroundColor Gray
-        Stop-Process -Name glazewm -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 1
-        
-        Write-Host "Restarting Zebar..." -ForegroundColor Gray
-        Stop-Process -Name zebar -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 1
-        
-        # Start GlazeWM (Zebar is launched automatically by glazewm config startup command)
-        Start-Process -FilePath "glazewm.exe" -WindowStyle Hidden -ErrorAction SilentlyContinue
-        Write-Host "✔ Applications restarted successfully!" -ForegroundColor Green
+# 6. Startup Applications
+Write-Host "`nDiscovering installation paths for GlazeWM..." -ForegroundColor Yellow
+$glazeExePath = "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
+if (-not (Test-Path $glazeExePath)) {
+    # Fallback to PATH search
+    $findGlaze = Get-Command glazewm -ErrorAction SilentlyContinue
+    if ($findGlaze) {
+        $glazeExePath = $findGlaze.Source
     } else {
-        Write-Host "Skipped restart. Please restart GlazeWM/Zebar manually or press Alt+Shift+R to reload Glaze config." -ForegroundColor Cyan
+        $glazeExePath = $null
+    }
+}
+
+if ($null -ne $glazeExePath) {
+    Write-Host "[OK] GlazeWM found at: $glazeExePath" -ForegroundColor Green
+    Write-Host "Starting GlazeWM (Zebar status bar will auto-launch with it)..." -ForegroundColor Cyan
+    try {
+        Start-Process -FilePath $glazeExePath -WindowStyle Hidden
+        Write-Host "[OK] Application environment started successfully!" -ForegroundColor Green
+    } catch {
+        Write-Warning "Could not start GlazeWM automatically. Please launch it manually."
     }
 } else {
-    Write-Host "GlazeWM/Zebar is not currently running. Start them normally to load configurations." -ForegroundColor Gray
+    Write-Warning "GlazeWM executable was not found in standard paths or PATH."
+    Write-Host "Please start GlazeWM manually to load the new settings." -ForegroundColor Cyan
 }
 
 Write-Host "`n==========================================================" -ForegroundColor Green
