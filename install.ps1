@@ -165,8 +165,34 @@ $homeUrlStyle = $userHome.Replace('\', '/')
 $yamlPath = Join-Path $glazeConfigDir "config.yaml"
 if (Test-Path $yamlPath) {
     try {
+        # Discover installation paths for Zebar
+        $zebarExePath = "C:\Program Files\glzr.io\Zebar\zebar.exe"
+        if (-not (Test-Path $zebarExePath)) {
+            $altZebarPaths = @(
+                (Join-Path $env:LOCALAPPDATA "Programs\Zebar\zebar.exe"),
+                (Join-Path $userHome "scoop\apps\zebar\current\zebar.exe")
+            )
+            foreach ($path in $altZebarPaths) {
+                if (Test-Path $path) {
+                    $zebarExePath = $path
+                    break
+                }
+            }
+        }
+        if (-not (Test-Path $zebarExePath)) {
+            # Fallback to PATH search
+            $findZebar = Get-Command zebar -ErrorAction SilentlyContinue
+            if ($findZebar) {
+                $zebarExePath = $findZebar.Source
+            } else {
+                $zebarExePath = "zebar"
+            }
+        }
+        $zebarUrlStyle = $zebarExePath.Replace('\', '/')
+
         $content = Get-Content $yamlPath -Raw
         $newContent = $content.Replace("{{USERPROFILE_FORWARD}}", $homeUrlStyle)
+        $newContent = $newContent.Replace("{{ZEBAR_FORWARD}}", $zebarUrlStyle)
         Set-Content $yamlPath $newContent -Force
         Write-Host "[OK] GlazeWM config.yaml updated dynamically." -ForegroundColor Gray
     } catch {
