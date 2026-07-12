@@ -153,7 +153,7 @@ You can install this configuration environment in one of two ways:
 ### Method 1: Web Installer (Quickest)
 Open PowerShell and run this single command to automatically download, install dependencies, copy configurations, and tailor user paths:
 ```powershell
-irm https://raw.githubusercontent.com/tolgaozisik/glazewm-zebar-config/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/702studio/glazewm-zebar-config/main/install.ps1 | iex
 ```
 
 ### Method 2: Local Installer (From Clone)
@@ -201,5 +201,6 @@ If you have cloned the repository locally:
 
 This configuration setup utilizes the following open-source utility for Windows display scaling control:
 * **[SetDPI](https://github.com/imniko/SetDPI)** by **[imniko](https://github.com/imniko)**: A lightweight CLI tool that allows changing Windows display scaling settings per monitor. The precompiled executable is bundled inside the `bin/` directory for installation convenience.
+
 
 

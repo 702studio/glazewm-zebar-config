@@ -1,11 +1,11 @@
 # Windows Customization Environment Installer (GlazeWM + Zebar)
 # This script can be run locally or via:
-# irm https://raw.githubusercontent.com/tolgaozisik/glazewm-zebar-config/main/install.ps1 | iex
+# irm https://raw.githubusercontent.com/702studio/glazewm-zebar-config/main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
 # Configurations
-$repoOwner = "tolgaozisik"
+$repoOwner = "702studio"
 $repoName = "glazewm-zebar-config"
 $branch = "main"
 $rawBaseUrl = "https://raw.githubusercontent.com/$repoOwner/$repoName/$branch"
@@ -274,3 +274,4 @@ if ($null -ne $glazeExePath) {
 Write-Host "`n==========================================================" -ForegroundColor Green
 Write-Host " Installation Successful! Your system is now configured. " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
+
